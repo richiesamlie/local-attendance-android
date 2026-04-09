@@ -4,13 +4,13 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.dagger.hilt.android.plugin'
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
     namespace 'com.localattendance.client'
 
     defaultConfig {
         applicationId "com.localattendance.client"
         minSdkVersion 26
-        targetSdkVersion 34
+        targetSdk 34
         versionCode 1
         versionName "1.0"
     }

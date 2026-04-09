@@ -1,12 +1,11 @@
+// Remove all plugin blocks and use the legacy apply syntax at the top
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.dagger.hilt.android.plugin'
 
 android {
-    // Use the legacy property names for maximum compatibility with AGP 8.x
     compileSdkVersion 34
-
     namespace 'com.localattendance.client'
 
     defaultConfig {

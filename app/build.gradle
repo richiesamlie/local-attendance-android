@@ -1,9 +1,8 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'kotlin-kapt'
-    id 'com.google.dagger.hilt.android.plugin'
-}
+// Use the apply plugin syntax instead of the plugins {} block for Hilt
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.dagger.hilt.android.plugin'
 
 android {
     namespace 'com.localattendance.client'

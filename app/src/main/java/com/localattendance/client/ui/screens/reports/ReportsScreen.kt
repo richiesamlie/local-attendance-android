@@ -43,7 +43,7 @@ fun ReportsScreen(
                 },
                 actions = {
                     IconButton(onClick = { /* Export */ }) {
-                        Icon(Icons.Default.Download, contentDescription = "Export")
+                        Icon(Icons.Default.FileDownload, contentDescription = "Export")
                     }
                 }
             )
@@ -68,7 +68,7 @@ fun ReportsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { selectedMonth = selectedMonth.minusMonths(1) }) {
-                        Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
+                        Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
                     }
                     Text(
                         selectedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
@@ -79,7 +79,7 @@ fun ReportsScreen(
                         onClick = { selectedMonth = selectedMonth.plusMonths(1) },
                         enabled = selectedMonth < YearMonth.now()
                     ) {
-                        Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next")
                     }
                 }
             }

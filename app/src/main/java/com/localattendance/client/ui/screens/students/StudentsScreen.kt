@@ -157,15 +157,15 @@ fun StudentCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    if (student.isFlagged) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            Icons.Default.Flag,
-                            contentDescription = "Flagged",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                            if (student.isFlagged) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = "Flagged",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
                 }
                 Text(
                     "Roll: ${student.rollNumber}",

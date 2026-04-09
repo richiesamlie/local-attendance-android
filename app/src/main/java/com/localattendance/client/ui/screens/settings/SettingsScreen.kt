@@ -10,12 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel(),
+    viewModel: com.localattendance.client.ui.screens.settings.SettingsViewModel = hiltViewModel(),
     onLogout: () -> Unit
 ) {
     val uiState = viewModel.uiState
@@ -119,7 +118,7 @@ fun SettingsScreen(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Icon(Icons.Default.Logout, contentDescription = null)
+                Icon(Icons.Default.ExitToApp, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Logout")
             }

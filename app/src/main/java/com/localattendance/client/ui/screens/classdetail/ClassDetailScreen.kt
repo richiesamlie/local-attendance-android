@@ -64,7 +64,7 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
-                    icon = Icons.Default.Assignment,
+                    icon = Icons.Default.List,
                     title = "Take Attendance",
                     description = "Record daily attendance for today or past dates",
                     onClick = onNavigateToAttendance
@@ -73,7 +73,7 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
-                    icon = Icons.Default.People,
+                    icon = Icons.Default.School,
                     title = "Students",
                     description = "Manage class roster, add or remove students",
                     onClick = onNavigateToStudents
@@ -82,7 +82,7 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
-                    icon = Icons.Default.TableChart,
+                    icon = Icons.Default.DateRange,
                     title = "Timetable",
                     description = "Weekly schedule and lesson planning",
                     onClick = onNavigateToTimetable
@@ -91,7 +91,7 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
-                    icon = Icons.Default.Event,
+                    icon = Icons.Default.CalendarMonth,
                     title = "Events",
                     description = "Classwork, tests, exams and calendar",
                     onClick = onNavigateToEvents
@@ -100,7 +100,7 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
-                    icon = Icons.Default.Assessment,
+                    icon = Icons.Default.Analytics,
                     title = "Reports",
                     description = "Monthly attendance summaries and exports",
                     onClick = onNavigateToReports
@@ -166,7 +166,7 @@ fun ClassActionCard(
                 )
             }
             Icon(
-                Icons.Default.ChevronRight,
+                Icons.Default.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

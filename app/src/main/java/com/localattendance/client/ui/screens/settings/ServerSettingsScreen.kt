@@ -1,81 +1,113 @@
 package com.localattendance.client.ui.screens.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import com.localattendance.client.data.repository.SettingsRepository
-
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
-) : ViewModel() {
-
-    val serverUrl: StateFlow<String?> = settingsRepository.serverUrl
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    fun saveUrl(url: String) {
-        viewModelScope.launch {
-            settingsRepository.saveServerUrl(url)
-        }
-    }
-}
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ServerSettingsScreen(
-    viewModel: SettingsViewModel,
-    onUrlSaved: () -> Unit
+    viewModel: ServerSettingsViewModel = hiltViewModel(),
+    onServerConfigured: () -> Unit
 ) {
-    var text by remember { mutableStateOf("") }
-    val currentUrl by viewModel.serverUrl.collectAsState()
-
-    LaunchedEffect(currentUrl) {
-        text = currentUrl ?: ""
-    }
+    var serverUrl by remember { mutableStateOf("") }
+    val isValidUrl = serverUrl.startsWith("http://") || serverUrl.startsWith("https://")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Server Configuration",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+        Icon(
+            Icons.Default.Cloud,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
-        Text(
-            text = "Enter the local IP address of your server (e.g., http://192.168.1.5:3000)",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Server URL") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
+
         Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Connect to Server",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Enter the IP address of your Local Attendance server to connect",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = serverUrl,
+            onValueChange = { serverUrl = it },
+            label = { Text("Server URL") },
+            placeholder = { Text("http://192.168.1.5:3000") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            isError = serverUrl.isNotBlank() && !isValidUrl
+        )
+
+        if (serverUrl.isNotBlank() && !isValidUrl) {
+            Text(
+                text = "URL must start with http:// or https://",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         Button(
             onClick = {
-                viewModel.saveUrl(text)
-                onUrlSaved()
+                viewModel.saveServerUrl(serverUrl)
+                onServerConfigured()
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = serverUrl.isNotBlank() && isValidUrl
         ) {
-            Text("Save and Continue")
+            Text("Connect")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    "Setup Instructions",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "1. Start your Local Attendance server\n2. Find your computer's IP address\n3. Enter http://YOUR_IP:3000 above",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }

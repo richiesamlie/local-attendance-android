@@ -17,7 +17,6 @@ import javax.inject.Inject
 import com.localattendance.client.data.api.AttendanceApi
 import com.localattendance.client.data.model.ClassRoom
 
-@OptIn(ExperimentalMaterial3Api::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val api: AttendanceApi
@@ -36,6 +35,7 @@ class HomeViewModel @Inject constructor(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,

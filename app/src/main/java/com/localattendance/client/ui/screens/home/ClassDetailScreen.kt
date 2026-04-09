@@ -21,7 +21,6 @@ import com.localattendance.client.data.api.AttendanceApi
 import com.localattendance.client.data.model.AttendanceRecord
 import com.localattendance.client.data.model.Student
 
-@OptIn(ExperimentalMaterial3Api::class)
 @HiltViewModel
 class ClassDetailViewModel @Inject constructor(
     private val api: AttendanceApi
@@ -56,6 +55,7 @@ class ClassDetailViewModel @Inject constructor(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClassDetailScreen(
     classId: String,

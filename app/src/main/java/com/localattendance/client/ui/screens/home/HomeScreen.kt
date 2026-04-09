@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import javax.inject.Inject
 import com.localattendance.client.data.api.AttendanceApi
 import com.localattendance.client.data.model.ClassRoom
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val api: AttendanceApi
@@ -49,7 +51,7 @@ fun HomeScreen(
         }
     ) { padding ->
         if (viewModel.classes.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("No classes found")
             }
         } else {

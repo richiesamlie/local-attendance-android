@@ -21,6 +21,7 @@ import com.localattendance.client.data.api.AttendanceApi
 import com.localattendance.client.data.model.AttendanceRecord
 import com.localattendance.client.data.model.Student
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HiltViewModel
 class ClassDetailViewModel @Inject constructor(
     private val api: AttendanceApi
@@ -28,7 +29,8 @@ class ClassDetailViewModel @Inject constructor(
     var students by mutableStateOf<List<Student>>(emptyList())
         private set
 
-    private val attendanceMap = mutableStateMapOf<String, String>()
+    private val _attendanceMap = mutableStateMapOf<String, String>()
+    val attendanceMap: Map<String, String> get() = _attendanceMap
 
     fun fetchStudents(classId: String) {
         viewModelScope.launch {
@@ -39,12 +41,12 @@ class ClassDetailViewModel @Inject constructor(
     }
 
     fun updateAttendance(studentId: String, status: String) {
-        attendanceMap[studentId] = status
+        _attendanceMap[studentId] = status
     }
 
     fun saveAttendance(classId: String, date: String) {
         viewModelScope.launch {
-            val records = attendanceMap.map { (studentId, status) ->
+            val records = _attendanceMap.map { (studentId, status) ->
                 AttendanceRecord(studentId, classId, date, status)
             }
             try {

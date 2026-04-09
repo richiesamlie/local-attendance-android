@@ -3,12 +3,14 @@ package com.localattendance.client.di
 import android.content.Context
 import com.localattendance.client.data.api.AttendanceApi
 import com.localattendance.client.data.api.CookieInterceptor
+import com.localattendance.client.data.api.DynamicBaseUrlInterceptor
 import com.localattendance.client.data.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -36,10 +38,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        cookieInterceptor: CookieInterceptor,
-        dynamicBaseUrlInterceptor: DynamicBaseUrlInterceptor
-    ): okhttp3.OkHttpClient {
-        return okhttp3.OkHttpClient.Builder()
+        dynamicBaseUrlInterceptor: DynamicBaseUrlInterceptor,
+        cookieInterceptor: CookieInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
             .addInterceptor(dynamicBaseUrlInterceptor)
             .addInterceptor(cookieInterceptor)
             .build()

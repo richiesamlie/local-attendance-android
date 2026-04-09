@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.localattendance.client.ui.screens.auth.AuthViewModel.LoginResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +31,7 @@ fun LoginScreen(
     val state = viewModel.loginState
 
     LaunchedEffect(state) {
-        if (state is AuthViewModel.LoginResult.Success) {
+        if (state is LoginResult.Success) {
             onLoginSuccess()
         }
     }
@@ -102,7 +101,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state is AuthViewModel.LoginResult.Loading) {
+            if (state is LoginResult.Loading) {
                 CircularProgressIndicator(modifier = Modifier.size(48.dp))
             } else {
                 Button(
@@ -116,7 +115,7 @@ fun LoginScreen(
                 }
             }
 
-            if (state is AuthViewModel.LoginResult.Error) {
+            if (state is LoginResult.Error) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     colors = CardDefaults.cardColors(

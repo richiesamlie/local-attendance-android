@@ -1,17 +1,18 @@
-// Use the apply plugin syntax instead of the plugins {} block for Hilt
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.dagger.hilt.android.plugin'
 
 android {
+    // Use the legacy property names for maximum compatibility with AGP 8.x
+    compileSdkVersion 34
+
     namespace 'com.localattendance.client'
-    compileSdk 34
 
     defaultConfig {
         applicationId "com.localattendance.client"
-        minSdk 26
-        targetSdk 34
+        minSdkVersion 26
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }

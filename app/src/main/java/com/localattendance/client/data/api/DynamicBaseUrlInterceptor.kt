@@ -15,19 +15,34 @@ class DynamicBaseUrlInterceptor @Inject constructor(
         var request = chain.request()
 
         val baseUrl = runBlocking {
-            settingsRepository.serverUrl.first() ?: "http://placeholder.com/"
+            settingsRepository.serverUrl.first() ?: return@runBlocking null
+        }
+
+        if (baseUrl == null || baseUrl.isBlank()) {
+            return chain.proceed(request)
+        }
+
+        val validUrl = try {
+            val parsed = java.net.URI(baseUrl)
+            require(!parsed.host.isNullOrBlank()) { "Invalid host" }
+            if (parsed.scheme != "http" && parsed.scheme != "https") {
+                throw IllegalArgumentException("Invalid scheme")
+            }
+            parsed
+        } catch (e: Exception) {
+            return chain.proceed(request)
         }
 
         val url = request.url
         val newUrl = url.newBuilder()
-            .host(baseUrl.removePrefix("http://").removePrefix("https://").split("/")[0])
+            .host(validUrl.host)
+            .port(validUrl.port.takeIf { it > 0 } ?: if (validUrl.scheme == "https") 443 else 80)
+            .scheme(validUrl.scheme)
             .build()
 
-        if (url.host == "placeholder.com") {
-            request = request.newBuilder()
-                .url(newUrl)
-                .build()
-        }
+        request = request.newBuilder()
+            .url(newUrl)
+            .build()
 
         return chain.proceed(request)
     }

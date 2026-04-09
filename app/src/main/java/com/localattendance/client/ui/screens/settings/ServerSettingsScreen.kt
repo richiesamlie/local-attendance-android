@@ -18,6 +18,7 @@ fun ServerSettingsScreen(
     onServerConfigured: () -> Unit
 ) {
     var serverUrl by remember { mutableStateOf("") }
+    var isSaving by remember { mutableStateOf(false) }
     val isValidUrl = serverUrl.startsWith("http://") || serverUrl.startsWith("https://")
 
     Column(
@@ -74,17 +75,24 @@ fun ServerSettingsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = {
-                viewModel.saveServerUrl(serverUrl)
-                onServerConfigured()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            enabled = serverUrl.isNotBlank() && isValidUrl
-        ) {
-            Text("Connect")
+        if (isSaving) {
+            CircularProgressIndicator(modifier = Modifier.size(48.dp))
+        } else {
+            Button(
+                onClick = {
+                    isSaving = true
+                    viewModel.saveServerUrl(serverUrl) {
+                        isSaving = false
+                        onServerConfigured()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                enabled = serverUrl.isNotBlank() && isValidUrl
+            ) {
+                Text("Connect")
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

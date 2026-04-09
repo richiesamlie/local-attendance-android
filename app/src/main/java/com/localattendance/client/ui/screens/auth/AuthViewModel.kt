@@ -28,6 +28,22 @@ class AuthViewModel @Inject constructor(
         private set
 
     fun login(username: String, password: String) {
+        if (username.isBlank()) {
+            loginState = LoginResult.Error("Username is required")
+            return
+        }
+        if (username.length < 3) {
+            loginState = LoginResult.Error("Username must be at least 3 characters")
+            return
+        }
+        if (password.isBlank()) {
+            loginState = LoginResult.Error("Password is required")
+            return
+        }
+        if (password.length < 4) {
+            loginState = LoginResult.Error("Password must be at least 4 characters")
+            return
+        }
         viewModelScope.launch {
             loginState = LoginResult.Loading
             try {

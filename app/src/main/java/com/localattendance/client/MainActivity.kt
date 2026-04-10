@@ -9,19 +9,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.localattendance.client.data.api.AuthEvents
 import com.localattendance.client.ui.navigation.AppNavigation
 import com.localattendance.client.ui.navigation.Screen
 import com.localattendance.client.ui.theme.LocalAttendanceTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var authEvents: AuthEvents
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,6 +38,6 @@ fun MainApp() {
     val startDestination = viewModel.startDestination
 
     if (startDestination != null) {
-        AppNavigation(startDestination = startDestination, authEvents = authEvents)
+        AppNavigation(startDestination = startDestination, authEvents = viewModel.authEvents)
     }
 }

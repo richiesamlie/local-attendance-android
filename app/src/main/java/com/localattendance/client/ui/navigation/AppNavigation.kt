@@ -17,6 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.localattendance.client.data.api.AuthEvent
 import com.localattendance.client.data.api.AuthEvents
 import com.localattendance.client.ui.screens.auth.LoginScreen
+import com.localattendance.client.ui.screens.join.JoinClassScreen
 import com.localattendance.client.ui.screens.settings.ServerSettingsScreen
 import com.localattendance.client.ui.screens.dashboard.DashboardScreen
 import com.localattendance.client.ui.screens.classes.ClassesScreen
@@ -105,10 +106,24 @@ fun AppNavigation(
                 )
             }
 
+            composable(Screen.JoinClass.route) {
+                JoinClassScreen(
+                    onBack = { navController.popBackStack() },
+                    onJoined = {
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.JoinClass.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     onClassClick = { classId ->
                         navController.navigate(Screen.ClassDetail.createRoute(classId))
+                    },
+                    onJoinClass = {
+                        navController.navigate(Screen.JoinClass.route)
                     }
                 )
             }

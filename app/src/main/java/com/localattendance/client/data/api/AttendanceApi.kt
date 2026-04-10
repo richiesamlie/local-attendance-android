@@ -117,4 +117,8 @@ interface AttendanceApi {
     // Sessions
     @POST("api/sessions/revoke")
     suspend fun revokeSessions(@Body request: Map<String, String>): Response<Map<String, Any>>
+
+    // Invites
+    @POST("api/invites/redeem")
+    suspend fun redeemInvite(@Body request: Map<String, String>): Response<Map<String, Any>>
 }

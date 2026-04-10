@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
     object Login : Screen("login", "Login")
     object ServerSetup : Screen("server", "Server Setup")
+    object JoinClass : Screen("join", "Join Class")
     object Dashboard : Screen("dashboard", "Dashboard", Icons.Default.Home)
     object Classes : Screen("classes", "Classes", Icons.Default.DateRange)
     object TakeAttendance : Screen("attendance/{classId}", "Take Attendance", Icons.AutoMirrored.Filled.List) {

@@ -23,7 +23,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
-    onClassClick: (String) -> Unit
+    onClassClick: (String) -> Unit,
+    onJoinClass: () -> Unit = {}
 ) {
     val uiState = viewModel.uiState
     val today = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))
@@ -147,8 +148,8 @@ fun DashboardScreen(
                         )
                         QuickActionButton(
                             modifier = Modifier.weight(1f),
-                            text = "View Reports",
-                            onClick = { /* Navigate to reports */ }
+                            text = "Join Class",
+                            onClick = onJoinClass
                         )
                     }
                 }

@@ -18,8 +18,14 @@ fun ServerSettingsScreen(
     onServerConfigured: () -> Unit
 ) {
     var serverUrl by remember { mutableStateOf("") }
-    var isSaving by remember { mutableStateOf(false) }
     val isValidUrl = serverUrl.startsWith("http://") || serverUrl.startsWith("https://")
+    val uiState = viewModel.uiState
+
+    LaunchedEffect(uiState.isSaved) {
+        if (uiState.isSaved) {
+            onServerConfigured()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -75,23 +81,34 @@ fun ServerSettingsScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (isSaving) {
+        if (uiState.isValidating) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
         } else {
             Button(
-                onClick = {
-                    isSaving = true
-                    viewModel.saveServerUrl(serverUrl) {
-                        isSaving = false
-                        onServerConfigured()
-                    }
-                },
+                onClick = { viewModel.saveServerUrl(serverUrl) {} },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = serverUrl.isNotBlank() && isValidUrl
+                enabled = serverUrl.isNotBlank() && isValidUrl && !uiState.isValidating
             ) {
                 Text("Connect")
+            }
+        }
+
+        if (uiState.validationError != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = uiState.validationError,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 

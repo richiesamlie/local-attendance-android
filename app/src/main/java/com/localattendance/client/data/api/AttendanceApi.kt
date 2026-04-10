@@ -12,6 +12,9 @@ interface AttendanceApi {
     @GET("api/auth/verify")
     suspend fun verifySession(): Response<Map<String, Any>>
 
+    @GET("api/health")
+    suspend fun healthCheck(): Response<Map<String, Any>>
+
     @GET("api/auth/me")
     suspend fun getMe(): Response<Teacher>
 

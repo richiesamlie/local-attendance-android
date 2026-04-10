@@ -35,7 +35,6 @@ class ClassDetailViewModel @Inject constructor(
             try {
                 val classesResponse = api.getClasses()
                 val studentsResponse = api.getStudents(classId)
-                val teachersResponse = api.getClassTeachers(classId)
 
                 if (classesResponse.isSuccessful) {
                     val classes = classesResponse.body() ?: emptyList()

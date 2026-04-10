@@ -1,7 +1,14 @@
 package com.localattendance.client.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
@@ -9,7 +16,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object ServerSetup : Screen("server", "Server Setup")
     object Dashboard : Screen("dashboard", "Dashboard", Icons.Default.Home)
     object Classes : Screen("classes", "Classes", Icons.Default.DateRange)
-    object TakeAttendance : Screen("attendance/{classId}", "Take Attendance", Icons.Default.List) {
+    object TakeAttendance : Screen("attendance/{classId}", "Take Attendance", Icons.AutoMirrored.Filled.List) {
         fun createRoute(classId: String) = "attendance/$classId"
     }
     object ClassDetail : Screen("class/{classId}", "Class Detail", Icons.Default.School) {

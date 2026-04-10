@@ -3,6 +3,9 @@ package com.localattendance.client.ui.screens.reports
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +41,7 @@ fun ReportsScreen(
                 title = { Text("Monthly Reports") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -68,7 +71,7 @@ fun ReportsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { selectedMonth = selectedMonth.minusMonths(1) }) {
-                        Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous")
                     }
                     Text(
                         selectedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
@@ -79,7 +82,7 @@ fun ReportsScreen(
                         onClick = { selectedMonth = selectedMonth.plusMonths(1) },
                         enabled = selectedMonth < YearMonth.now()
                     ) {
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next")
                     }
                 }
             }

@@ -18,6 +18,7 @@ import com.localattendance.client.data.model.ClassRoom
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun ClassesScreen(
     viewModel: ClassesViewModel = hiltViewModel(),
     onClassClick: (String) -> Unit,

@@ -110,4 +110,8 @@ interface AttendanceApi {
 
     @DELETE("api/timetable/{id}")
     suspend fun deleteTimetableSlot(@Path("id") id: String): Response<Map<String, Any>>
+
+    // Sessions
+    @POST("api/sessions/revoke")
+    suspend fun revokeSessions(@Body request: Map<String, String>): Response<Map<String, Any>>
 }

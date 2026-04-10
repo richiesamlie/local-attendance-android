@@ -1,5 +1,7 @@
 package com.localattendance.client.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class Teacher(
     val id: String,
     val username: String,
@@ -10,8 +12,8 @@ data class Teacher(
 data class ClassRoom(
     val id: String,
     val name: String,
-    val teacherId: String? = null,
-    val ownerName: String? = null,
+    @SerializedName("teacher_id") val teacherId: String? = null,
+    @SerializedName("owner_name") val ownerName: String? = null,
     val role: String? = null
 )
 

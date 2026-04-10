@@ -63,6 +63,7 @@ class SettingsViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             try {
+                api.revokeSessions(mapOf("sessionId" to "all"))
                 api.logout()
                 settingsRepository.clearServerUrl()
             } catch (e: Exception) {

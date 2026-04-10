@@ -2,6 +2,8 @@ package com.localattendance.client.di
 
 import android.content.Context
 import com.localattendance.client.data.api.AttendanceApi
+import com.localattendance.client.data.api.AuthEvents
+import com.localattendance.client.data.api.AuthInterceptor
 import com.localattendance.client.data.api.CookieInterceptor
 import com.localattendance.client.data.api.DynamicBaseUrlInterceptor
 import com.localattendance.client.data.repository.SettingsRepository
@@ -37,13 +39,30 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAuthEvents(): AuthEvents {
+        return AuthEvents()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(
+        authEvents: AuthEvents,
+        @ApplicationContext context: Context
+    ): AuthInterceptor {
+        return AuthInterceptor(authEvents, context)
+    }
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(
         dynamicBaseUrlInterceptor: DynamicBaseUrlInterceptor,
-        cookieInterceptor: CookieInterceptor
+        cookieInterceptor: CookieInterceptor,
+        authInterceptor: AuthInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(dynamicBaseUrlInterceptor)
             .addInterceptor(cookieInterceptor)
+            .addInterceptor(authInterceptor)
             .build()
     }
 

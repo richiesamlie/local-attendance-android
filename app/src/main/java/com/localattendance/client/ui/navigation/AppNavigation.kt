@@ -14,6 +14,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.localattendance.client.data.api.AuthEvent
+import com.localattendance.client.data.api.AuthEvents
 import com.localattendance.client.ui.screens.auth.LoginScreen
 import com.localattendance.client.ui.screens.settings.ServerSettingsScreen
 import com.localattendance.client.ui.screens.dashboard.DashboardScreen
@@ -24,15 +26,29 @@ import com.localattendance.client.ui.screens.students.StudentsScreen
 import com.localattendance.client.ui.screens.timetable.TimetableScreen
 import com.localattendance.client.ui.screens.events.EventsScreen
 import com.localattendance.client.ui.screens.reports.ReportsScreen
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.ServerSetup.route
+    startDestination: String = Screen.ServerSetup.route,
+    authEvents: AuthEvents
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    LaunchedEffect(Unit) {
+        authEvents.events.collectLatest { event ->
+            when (event) {
+                is AuthEvent.SessionExpired -> {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
 
     val showBottomBar = currentDestination?.route in listOf(
         Screen.Dashboard.route,

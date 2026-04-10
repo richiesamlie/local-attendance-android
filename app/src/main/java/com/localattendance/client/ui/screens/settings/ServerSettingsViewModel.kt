@@ -33,7 +33,8 @@ class ServerSettingsViewModel @Inject constructor(
             try {
                 settingsRepository.saveServerUrl(url)
                 val healthResponse = api.healthCheck()
-                if (healthResponse.isSuccessful && healthResponse.body()?.get("status") == "ok") {
+                val status = healthResponse.body()?.get("status") as? String
+                if (healthResponse.isSuccessful && (status == "ok" || status == "healthy")) {
                     uiState = uiState.copy(isValidating = false, isSaved = true)
                     onComplete()
                 } else {

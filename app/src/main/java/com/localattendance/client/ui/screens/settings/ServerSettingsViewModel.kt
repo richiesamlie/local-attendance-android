@@ -31,9 +31,9 @@ class ServerSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             uiState = uiState.copy(isValidating = true, validationError = null)
             try {
+                settingsRepository.saveServerUrl(url)
                 val healthResponse = api.healthCheck()
                 if (healthResponse.isSuccessful && healthResponse.body()?.get("status") == "ok") {
-                    settingsRepository.saveServerUrl(url)
                     uiState = uiState.copy(isValidating = false, isSaved = true)
                     onComplete()
                 } else {

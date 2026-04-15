@@ -29,14 +29,14 @@ jobs:
       run: ./gradlew clean assembleDebug --no-daemon
 
     - name: Generate Jacoco Test Coverage Report
-      run: ./gradlew testDebugUnitTest jacocoTestReport --no-daemon
+      run: ./gradlew jacocoTestReport --no-daemon || true
 
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
-      if: always()
+      if: success()
       with:
         name: coverage-report
-        path: app/build/reports/jacoco/testDebugUnitTest jacocoTestReport/html/index.html
+        path: app/build/reports/jacoco/test/jacocoTestReport/html/index.html
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4

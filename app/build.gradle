@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
     id 'com.google.dagger.hilt.android'
+    id 'jacoco'
 }
 
 android {
@@ -19,7 +20,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -36,6 +37,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.10'
     }
+}
+
+jacoco {
+    toolVersion = '0.8.11'
 }
 
 dependencies {
@@ -60,5 +65,5 @@ dependencies {
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
 
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.security:security-crypto:1.1.0'
 }

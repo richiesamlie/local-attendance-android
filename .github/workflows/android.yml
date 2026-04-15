@@ -28,6 +28,16 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean assembleDebug --no-daemon
 
+    - name: Generate Jacoco Test Coverage Report
+      run: ./gradlew testDebugUnitTest jacocoTestReport --no-daemon
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: app/build/reports/jacoco/testDebugUnitTest jacocoTestReport/html/index.html
+
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:

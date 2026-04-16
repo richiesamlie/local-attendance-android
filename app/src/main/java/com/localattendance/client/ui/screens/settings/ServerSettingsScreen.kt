@@ -64,7 +64,7 @@ fun ServerSettingsScreen(
             value = serverUrl,
             onValueChange = { serverUrl = it },
             label = { Text("Server URL") },
-            placeholder = { Text("http://192.168.1.5:3000") },
+            placeholder = { Text("http://192.168.1.5:3000 (or http://localhost:3000)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = serverUrl.isNotBlank() && !isValidUrl

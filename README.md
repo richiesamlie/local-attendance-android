@@ -39,6 +39,20 @@ gh run list --workflow android.yml --limit 5
 gh run view <run-id> --json status,conclusion,headSha,createdAt,updatedAt,url,jobs
 ```
 
+## Release APK ke GitHub Releases
+Workflow sudah mendukung publish APK otomatis ke Release page saat push tag versi (`v*`).
+
+Langkah:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Hasil:
+- CI build jalan
+- APK debug di-upload sebagai workflow artifact
+- GitHub Release dibuat/diupdate otomatis untuk tag tersebut + APK dilampirkan
+
 ## Runtime Smoke Checklist
 Lihat:
 - `docs/TESTING.md`

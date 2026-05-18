@@ -9,7 +9,7 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
@@ -33,7 +33,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object Events : Screen("events/{classId}", "Events", Icons.Default.CalendarMonth) {
         fun createRoute(classId: String) = "events/$classId"
     }
-    object DailyNotes : Screen("notes/{classId}", "Daily Notes", Icons.Default.Notes) {
+    object DailyNotes : Screen("notes/{classId}", "Daily Notes", Icons.AutoMirrored.Filled.Notes) {
         fun createRoute(classId: String) = "notes/$classId"
     }
     object Reports : Screen("reports/{classId}", "Reports", Icons.Default.Analytics) {

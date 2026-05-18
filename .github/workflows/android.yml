@@ -2,10 +2,11 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "develop", "main" ]
     tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,39 +19,91 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: gradle
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew clean assembleDebug --no-daemon
+    - name: Gradle dependency prefetch (retry up to 3x)
+      shell: bash
+      run: |
+        set -o pipefail
+        ATTEMPT=1
+        MAX=3
+        rm -f gradle-build.log
+        while [ $ATTEMPT -le $MAX ]; do
+          echo "=== Prefetch attempt ${ATTEMPT}/${MAX} ===" | tee -a gradle-build.log
+          if ./gradlew --no-daemon help --stacktrace 2>&1 | tee -a gradle-build.log; then
+            echo "Prefetch succeeded on attempt ${ATTEMPT}" | tee -a gradle-build.log
+            exit 0
+          fi
+          if [ $ATTEMPT -lt $MAX ]; then
+            echo "Prefetch failed on attempt ${ATTEMPT}, retrying in 10s..." | tee -a gradle-build.log
+            sleep 10
+          fi
+          ATTEMPT=$((ATTEMPT+1))
+        done
+        echo "Prefetch failed after ${MAX} attempts. Last 120 log lines:" | tee -a gradle-build.log
+        tail -n 120 gradle-build.log
+        exit 1
+
+    - name: Build with Gradle (retry up to 3x)
+      shell: bash
+      run: |
+        set -o pipefail
+        ATTEMPT=1
+        MAX=3
+        rm -f gradle-build.log
+        while [ $ATTEMPT -le $MAX ]; do
+          echo "=== Gradle build attempt ${ATTEMPT}/${MAX} ===" | tee -a gradle-build.log
+          if ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tee -a gradle-build.log; then
+            echo "Build succeeded on attempt ${ATTEMPT}" | tee -a gradle-build.log
+            exit 0
+          fi
+          if [ $ATTEMPT -lt $MAX ]; then
+            echo "Build failed on attempt ${ATTEMPT}, retrying in 10s..." | tee -a gradle-build.log
+            sleep 10
+          fi
+          ATTEMPT=$((ATTEMPT+1))
+        done
+        echo "Build failed after ${MAX} attempts. Last 120 log lines:" | tee -a gradle-build.log
+        tail -n 120 gradle-build.log
+        exit 1
+
+    - name: Upload Build Log
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: gradle-build-log
+        path: gradle-build.log
 
     - name: Generate Jacoco Test Coverage Report
       run: ./gradlew jacocoTestReport --no-daemon || true
 
     - name: Upload Coverage Report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: success()
       with:
         name: coverage-report
         path: app/build/reports/jacoco/test/jacocoTestReport/html/index.html
 
     - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
 
     - name: Create GitHub Release (tag builds)
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v2
-      with:
-        files: app/build/outputs/apk/debug/app-debug.apk
-        generate_release_notes: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "${GITHUB_REF_NAME}" app/build/outputs/apk/debug/app-debug.apk --generate-notes --verify-tag \
+          || gh release upload "${GITHUB_REF_NAME}" app/build/outputs/apk/debug/app-debug.apk --clobber

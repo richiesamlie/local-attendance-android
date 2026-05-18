@@ -68,7 +68,10 @@ class DailyNotesViewModel @Inject constructor(
         viewModelScope.launch {
             uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
             try {
-                val response = api.saveDailyNote(classId, date, mapOf("note" to note))
+                val response = api.saveDailyNote(
+                    classId,
+                    mapOf("date" to date, "note" to note)
+                )
                 if (response.isSuccessful) {
                     uiState = uiState.copy(
                         isSaving = false,

@@ -9,6 +9,7 @@ import okhttp3.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("DEPRECATION")
 @Singleton
 class AuthInterceptor @Inject constructor(
     private val authEvents: AuthEvents,

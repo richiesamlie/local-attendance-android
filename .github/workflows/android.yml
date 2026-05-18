@@ -30,11 +30,28 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
+    - name: Build with Gradle (retry up to 3x)
       shell: bash
       run: |
         set -o pipefail
-        ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle-build.log
+        ATTEMPT=1
+        MAX=3
+        rm -f gradle-build.log
+        while [ $ATTEMPT -le $MAX ]; do
+          echo "=== Gradle build attempt ${ATTEMPT}/${MAX} ===" | tee -a gradle-build.log
+          if ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tee -a gradle-build.log; then
+            echo "Build succeeded on attempt ${ATTEMPT}" | tee -a gradle-build.log
+            exit 0
+          fi
+          if [ $ATTEMPT -lt $MAX ]; then
+            echo "Build failed on attempt ${ATTEMPT}, retrying in 10s..." | tee -a gradle-build.log
+            sleep 10
+          fi
+          ATTEMPT=$((ATTEMPT+1))
+        done
+        echo "Build failed after ${MAX} attempts. Last 120 log lines:" | tee -a gradle-build.log
+        tail -n 120 gradle-build.log
+        exit 1
 
     - name: Upload Build Log
       if: always()

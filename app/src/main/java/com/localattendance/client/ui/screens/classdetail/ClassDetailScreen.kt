@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -29,6 +30,7 @@ fun ClassDetailScreen(
     onNavigateToStudents: () -> Unit,
     onNavigateToTimetable: () -> Unit,
     onNavigateToEvents: () -> Unit,
+    onNavigateToDailyNotes: () -> Unit,
     onNavigateToReports: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -108,6 +110,15 @@ fun ClassDetailScreen(
 
             item {
                 ClassActionCard(
+                    icon = Icons.Default.MenuBook,
+                    title = "Daily Notes",
+                    description = "Teacher daily notes and reflections",
+                    onClick = onNavigateToDailyNotes
+                )
+            }
+
+            item {
+                ClassActionCard(
                     icon = Icons.Default.Analytics,
                     title = "Reports",
                     description = "Monthly attendance summaries and exports",
@@ -129,6 +140,7 @@ fun ClassDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         InfoRow("Role", uiState.role?.replaceFirstChar { it.uppercase() } ?: "Teacher")
                         InfoRow("Total Students", "${uiState.studentCount}")
+                        InfoRow("Total Teachers", "${uiState.teachers.size}")
                         uiState.ownerName?.let { InfoRow("Owner", it) }
                     }
                 }

@@ -26,6 +26,7 @@ import com.localattendance.client.ui.screens.classdetail.ClassDetailScreen
 import com.localattendance.client.ui.screens.students.StudentsScreen
 import com.localattendance.client.ui.screens.timetable.TimetableScreen
 import com.localattendance.client.ui.screens.events.EventsScreen
+import com.localattendance.client.ui.screens.notes.DailyNotesScreen
 import com.localattendance.client.ui.screens.reports.ReportsScreen
 import kotlinx.coroutines.flow.collectLatest
 
@@ -168,6 +169,9 @@ fun AppNavigation(
                     onNavigateToEvents = {
                         navController.navigate(Screen.Events.createRoute(classId))
                     },
+                    onNavigateToDailyNotes = {
+                        navController.navigate(Screen.DailyNotes.createRoute(classId))
+                    },
                     onNavigateToReports = {
                         navController.navigate(Screen.Reports.createRoute(classId))
                     },
@@ -214,6 +218,17 @@ fun AppNavigation(
             ) { backStackEntry ->
                 val classId = backStackEntry.arguments?.getString("classId") ?: ""
                 EventsScreen(
+                    classId = classId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.DailyNotes.route,
+                arguments = listOf(navArgument("classId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val classId = backStackEntry.arguments?.getString("classId") ?: ""
+                DailyNotesScreen(
                     classId = classId,
                     onBack = { navController.popBackStack() }
                 )

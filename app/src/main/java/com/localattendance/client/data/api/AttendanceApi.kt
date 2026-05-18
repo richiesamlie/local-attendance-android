@@ -38,13 +38,13 @@ interface AttendanceApi {
     suspend fun getClassTeachers(@Path("classId") classId: String): Response<List<Teacher>>
 
     // Students
-    @GET("api/classes/{classId}/students")
+    @GET("api/students/{classId}/students")
     suspend fun getStudents(
         @Path("classId") classId: String,
         @Query("includeArchived") includeArchived: Boolean = false
     ): Response<List<Student>>
 
-    @POST("api/classes/{classId}/students")
+    @POST("api/students/{classId}/students")
     suspend fun addStudent(
         @Path("classId") classId: String,
         @Body student: Student
@@ -60,27 +60,27 @@ interface AttendanceApi {
     suspend fun deleteStudent(@Path("id") id: String): Response<Map<String, Any>>
 
     // Attendance Records
-    @GET("api/classes/{classId}/records")
+    @GET("api/records/classes/{classId}/records")
     suspend fun getAttendanceRecords(@Path("classId") classId: String): Response<List<AttendanceRecord>>
 
     @POST("api/records")
     suspend fun saveAttendance(@Body records: List<AttendanceRecord>): Response<Map<String, Any>>
 
     // Daily Notes
-    @GET("api/classes/{classId}/daily-notes")
+    @GET("api/notes/classes/{classId}/daily-notes")
     suspend fun getDailyNotes(@Path("classId") classId: String): Response<Map<String, String>>
 
-    @POST("api/classes/{classId}/daily-notes")
+    @POST("api/notes/classes/{classId}/daily-notes")
     suspend fun saveDailyNote(
         @Path("classId") classId: String,
         @Body request: Map<String, String>
     ): Response<Map<String, Any>>
 
     // Events
-    @GET("api/classes/{classId}/events")
+    @GET("api/events/classes/{classId}/events")
     suspend fun getEvents(@Path("classId") classId: String): Response<List<Event>>
 
-    @POST("api/classes/{classId}/events")
+    @POST("api/events/classes/{classId}/events")
     suspend fun addEvent(
         @Path("classId") classId: String,
         @Body event: Event
@@ -96,10 +96,10 @@ interface AttendanceApi {
     suspend fun deleteEvent(@Path("id") id: String): Response<Map<String, Any>>
 
     // Timetable
-    @GET("api/classes/{classId}/timetable")
+    @GET("api/timetable/classes/{classId}/timetable")
     suspend fun getTimetable(@Path("classId") classId: String): Response<List<TimetableSlot>>
 
-    @POST("api/classes/{classId}/timetable")
+    @POST("api/timetable/classes/{classId}/timetable")
     suspend fun addTimetableSlot(
         @Path("classId") classId: String,
         @Body slot: TimetableSlot
@@ -119,6 +119,6 @@ interface AttendanceApi {
     suspend fun revokeSessions(@Body request: Map<String, String>): Response<Map<String, Any>>
 
     // Invites
-    @POST("api/invites/redeem")
+    @POST("api/invites/invites/redeem")
     suspend fun redeemInvite(@Body request: Map<String, String>): Response<Map<String, Any>>
 }

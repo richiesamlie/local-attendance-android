@@ -1,0 +1,9 @@
+# Local caches / generated temp
+.gradle/
+.artifacts/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp

@@ -31,7 +31,17 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew clean assembleDebug --no-daemon
+      shell: bash
+      run: |
+        set -o pipefail
+        ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle-build.log
+
+    - name: Upload Build Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gradle-build-log
+        path: gradle-build.log
 
     - name: Generate Jacoco Test Coverage Report
       run: ./gradlew jacocoTestReport --no-daemon || true

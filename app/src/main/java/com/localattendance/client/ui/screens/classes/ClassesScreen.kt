@@ -1,14 +1,42 @@
 package com.localattendance.client.ui.screens.classes
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,8 +53,22 @@ fun ClassesScreen(
     onCreateClass: (String) -> Unit
 ) {
     val uiState = viewModel.uiState
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showEditDialogFor by remember { mutableStateOf<ClassRoom?>(null) }
     var newClassName by remember { mutableStateOf("") }
+
+    LaunchedEffect(uiState.error, uiState.successMessage) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessages()
+        }
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessages()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -38,41 +80,56 @@ fun ClassesScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else if (uiState.classes.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("No classes yet")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { showCreateDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Create Class")
+
+            uiState.classes.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("No classes yet")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { showCreateDialog = true }) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Create Class")
+                        }
                     }
                 }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(uiState.classes) { classRoom ->
-                    ClassItem(
-                        classRoom = classRoom,
-                        onClick = { onClassClick(classRoom.id) },
-                        onDelete = { viewModel.deleteClass(classRoom.id) }
-                    )
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.classes) { classRoom ->
+                        ClassItem(
+                            classRoom = classRoom,
+                            onClick = { onClassClick(classRoom.id) },
+                            onEdit = { showEditDialogFor = classRoom },
+                            onDelete = { viewModel.deleteClass(classRoom.id) }
+                        )
+                    }
                 }
             }
         }
@@ -80,7 +137,7 @@ fun ClassesScreen(
 
     if (showCreateDialog) {
         AlertDialog(
-            onDismissRequest = { showCreateDialog = false },
+            onDismissRequest = { if (!uiState.isSaving) showCreateDialog = false },
             title = { Text("Create New Class") },
             text = {
                 OutlinedTextField(
@@ -93,19 +150,54 @@ fun ClassesScreen(
             },
             confirmButton = {
                 TextButton(
+                    enabled = !uiState.isSaving && newClassName.isNotBlank(),
                     onClick = {
-                        if (newClassName.isNotBlank()) {
-                            viewModel.createClass(newClassName)
+                        viewModel.createClass(newClassName.trim()) {
                             newClassName = ""
                             showCreateDialog = false
                         }
                     }
                 ) {
-                    Text("Create")
+                    Text(if (uiState.isSaving) "Saving..." else "Create")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCreateDialog = false }) {
+                TextButton(onClick = { showCreateDialog = false }, enabled = !uiState.isSaving) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    showEditDialogFor?.let { classRoom ->
+        var editedName by remember(classRoom.id) { mutableStateOf(classRoom.name) }
+
+        AlertDialog(
+            onDismissRequest = { if (!uiState.isSaving) showEditDialogFor = null },
+            title = { Text("Edit Class") },
+            text = {
+                OutlinedTextField(
+                    value = editedName,
+                    onValueChange = { editedName = it },
+                    label = { Text("Class Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !uiState.isSaving && editedName.isNotBlank(),
+                    onClick = {
+                        viewModel.updateClass(classRoom.id, editedName.trim()) {
+                            showEditDialogFor = null
+                        }
+                    }
+                ) {
+                    Text(if (uiState.isSaving) "Saving..." else "Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialogFor = null }, enabled = !uiState.isSaving) {
                     Text("Cancel")
                 }
             }
@@ -114,9 +206,10 @@ fun ClassesScreen(
 }
 
 @Composable
-fun ClassItem(
+private fun ClassItem(
     classRoom: ClassRoom,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -146,13 +239,19 @@ fun ClassItem(
                     )
                 }
             }
+
             if (classRoom.role == "owner" || classRoom.role == "administrator") {
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }

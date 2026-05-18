@@ -13,8 +13,10 @@ import javax.inject.Inject
 
 data class EventsUiState(
     val isLoading: Boolean = true,
+    val isSaving: Boolean = false,
     val events: List<Event> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -24,6 +26,10 @@ class EventsViewModel @Inject constructor(
 
     var uiState by mutableStateOf(EventsUiState())
         private set
+
+    fun clearMessages() {
+        uiState = uiState.copy(error = null, successMessage = null)
+    }
 
     fun loadEvents(classId: String) {
         viewModelScope.launch {
@@ -40,6 +46,59 @@ class EventsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 uiState = uiState.copy(isLoading = false, error = e.message)
+            }
+        }
+    }
+
+    fun addEvent(classId: String, event: Event, onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
+            try {
+                val response = api.addEvent(classId, event)
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, successMessage = "Event added")
+                    loadEvents(classId)
+                    onDone()
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to add event")
+                }
+            } catch (e: Exception) {
+                uiState = uiState.copy(isSaving = false, error = e.message)
+            }
+        }
+    }
+
+    fun updateEvent(classId: String, id: String, request: Map<String, Any>, onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
+            try {
+                val response = api.updateEvent(id, request)
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, successMessage = "Event updated")
+                    loadEvents(classId)
+                    onDone()
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to update event")
+                }
+            } catch (e: Exception) {
+                uiState = uiState.copy(isSaving = false, error = e.message)
+            }
+        }
+    }
+
+    fun deleteEvent(classId: String, id: String) {
+        viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
+            try {
+                val response = api.deleteEvent(id)
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, successMessage = "Event deleted")
+                    loadEvents(classId)
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to delete event")
+                }
+            } catch (e: Exception) {
+                uiState = uiState.copy(isSaving = false, error = e.message)
             }
         }
     }

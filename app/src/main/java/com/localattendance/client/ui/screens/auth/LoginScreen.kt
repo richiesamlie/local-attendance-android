@@ -1,13 +1,35 @@
 package com.localattendance.client.ui.screens.auth
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,10 +50,16 @@ fun LoginScreen(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val state = viewModel.loginState
 
-    LaunchedEffect(state) {
-        if (state is LoginResult.Success) {
+    val loginState = viewModel.loginState
+    val sessionRestoreState = viewModel.sessionRestoreState
+
+    LaunchedEffect(Unit) {
+        viewModel.restoreSessionIfAvailable()
+    }
+
+    LaunchedEffect(loginState, sessionRestoreState) {
+        if (loginState is LoginResult.Success || sessionRestoreState is SessionRestoreState.Restored) {
             onLoginSuccess()
         }
     }
@@ -101,8 +129,18 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state is LoginResult.Loading) {
+            val busy = loginState is LoginResult.Loading || sessionRestoreState is SessionRestoreState.Checking
+
+            if (busy) {
                 CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                if (sessionRestoreState is SessionRestoreState.Checking) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Checking existing session...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
                 Button(
                     onClick = { viewModel.login(username, password) },
@@ -115,7 +153,7 @@ fun LoginScreen(
                 }
             }
 
-            if (state is LoginResult.Error) {
+            if (loginState is LoginResult.Error) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     colors = CardDefaults.cardColors(
@@ -124,7 +162,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = state.message,
+                        text = loginState.message,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(16.dp),
                         textAlign = TextAlign.Center

@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localattendance.client.data.api.AttendanceApi
-import com.localattendance.client.data.model.ClassRoom
 import com.localattendance.client.data.model.Teacher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,6 +17,7 @@ data class ClassDetailUiState(
     val role: String? = null,
     val ownerName: String? = null,
     val studentCount: Int = 0,
+    val teachers: List<Teacher> = emptyList(),
     val error: String? = null
 )
 
@@ -35,6 +35,7 @@ class ClassDetailViewModel @Inject constructor(
             try {
                 val classesResponse = api.getClasses()
                 val studentsResponse = api.getStudents(classId)
+                val teachersResponse = api.getClassTeachers(classId)
 
                 if (classesResponse.isSuccessful) {
                     val classes = classesResponse.body() ?: emptyList()
@@ -44,12 +45,19 @@ class ClassDetailViewModel @Inject constructor(
                         (studentsResponse.body() ?: emptyList()).size
                     } else 0
 
+                    val teachers = if (teachersResponse.isSuccessful) {
+                        teachersResponse.body() ?: emptyList()
+                    } else {
+                        emptyList()
+                    }
+
                     uiState = uiState.copy(
                         isLoading = false,
                         className = currentClass?.name,
                         role = currentClass?.role,
                         ownerName = currentClass?.ownerName,
-                        studentCount = studentCount
+                        studentCount = studentCount,
+                        teachers = teachers
                     )
                 } else {
                     uiState = uiState.copy(isLoading = false, error = "Failed to load class")

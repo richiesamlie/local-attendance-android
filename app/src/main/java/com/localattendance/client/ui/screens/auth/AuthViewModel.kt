@@ -19,6 +19,13 @@ sealed class LoginResult {
     data class Error(val message: String) : LoginResult()
 }
 
+sealed class SessionRestoreState {
+    object Idle : SessionRestoreState()
+    object Checking : SessionRestoreState()
+    object Restored : SessionRestoreState()
+    object NotRestored : SessionRestoreState()
+}
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val api: AttendanceApi
@@ -26,6 +33,30 @@ class AuthViewModel @Inject constructor(
 
     var loginState by mutableStateOf<LoginResult>(LoginResult.Idle)
         private set
+
+    var sessionRestoreState by mutableStateOf<SessionRestoreState>(SessionRestoreState.Idle)
+        private set
+
+    fun restoreSessionIfAvailable() {
+        if (sessionRestoreState is SessionRestoreState.Checking || sessionRestoreState is SessionRestoreState.Restored) {
+            return
+        }
+
+        viewModelScope.launch {
+            sessionRestoreState = SessionRestoreState.Checking
+            try {
+                val response = api.verifySession()
+                val authenticated = response.isSuccessful && response.body()?.get("authenticated") == true
+                sessionRestoreState = if (authenticated) {
+                    SessionRestoreState.Restored
+                } else {
+                    SessionRestoreState.NotRestored
+                }
+            } catch (e: Exception) {
+                sessionRestoreState = SessionRestoreState.NotRestored
+            }
+        }
+    }
 
     fun login(username: String, password: String) {
         if (username.isBlank()) {
@@ -49,6 +80,7 @@ class AuthViewModel @Inject constructor(
             try {
                 val response = api.login(LoginRequest(username, password))
                 if (response.isSuccessful && response.body()?.success == true) {
+                    sessionRestoreState = SessionRestoreState.Restored
                     loginState = LoginResult.Success
                 } else {
                     val errorBody = response.body()?.error

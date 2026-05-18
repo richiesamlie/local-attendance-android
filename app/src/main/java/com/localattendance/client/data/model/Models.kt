@@ -63,7 +63,7 @@ data class TimetableSlot(
     val startTime: String,
     val endTime: String,
     val subject: String,
-    val lesson: Int
+    val lesson: String
 )
 
 data class DailyNote(

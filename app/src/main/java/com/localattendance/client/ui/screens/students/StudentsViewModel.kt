@@ -14,8 +14,10 @@ import javax.inject.Inject
 
 data class StudentsUiState(
     val isLoading: Boolean = true,
+    val isSaving: Boolean = false,
     val students: List<Student> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -25,6 +27,10 @@ class StudentsViewModel @Inject constructor(
 
     var uiState by mutableStateOf(StudentsUiState())
         private set
+
+    fun clearMessages() {
+        uiState = uiState.copy(error = null, successMessage = null)
+    }
 
     fun loadStudents(classId: String) {
         viewModelScope.launch {
@@ -45,30 +51,73 @@ class StudentsViewModel @Inject constructor(
         }
     }
 
-    fun addStudent(classId: String, name: String, rollNumber: String) {
+    fun addStudent(classId: String, name: String, rollNumber: String, onDone: () -> Unit = {}) {
         viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
             try {
                 val studentId = "student_${UUID.randomUUID().toString().replace("-", "").slice(0..15)}"
                 val student = Student(studentId, name, rollNumber)
                 val response = api.addStudent(classId, student)
                 if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, successMessage = "Student added")
                     loadStudents(classId)
+                    onDone()
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to add student")
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(error = e.message)
+                uiState = uiState.copy(isSaving = false, error = e.message)
             }
         }
     }
 
-    fun deleteStudent(studentId: String) {
+    fun updateStudent(
+        classId: String,
+        studentId: String,
+        name: String,
+        rollNumber: String,
+        parentName: String = "",
+        parentPhone: String = "",
+        isFlagged: Boolean = false,
+        onDone: () -> Unit = {}
+    ) {
         viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
+            try {
+                val request: Map<String, Any> = mapOf(
+                    "name" to name,
+                    "rollNumber" to rollNumber,
+                    "parentName" to parentName,
+                    "parentPhone" to parentPhone,
+                    "isFlagged" to isFlagged
+                )
+                val response = api.updateStudent(studentId, request)
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, successMessage = "Student updated")
+                    loadStudents(classId)
+                    onDone()
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to update student")
+                }
+            } catch (e: Exception) {
+                uiState = uiState.copy(isSaving = false, error = e.message)
+            }
+        }
+    }
+
+    fun deleteStudent(classId: String, studentId: String) {
+        viewModelScope.launch {
+            uiState = uiState.copy(isSaving = true, error = null, successMessage = null)
             try {
                 val response = api.deleteStudent(studentId)
                 if (response.isSuccessful) {
-                    uiState = uiState.copy(students = uiState.students.filter { it.id != studentId })
+                    uiState = uiState.copy(isSaving = false, successMessage = "Student removed")
+                    loadStudents(classId)
+                } else {
+                    uiState = uiState.copy(isSaving = false, error = "Failed to remove student")
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(error = e.message)
+                uiState = uiState.copy(isSaving = false, error = e.message)
             }
         }
     }

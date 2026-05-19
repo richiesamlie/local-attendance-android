@@ -63,7 +63,7 @@ jobs:
         rm -f gradle-build.log
         while [ $ATTEMPT -le $MAX ]; do
           echo "=== Gradle build attempt ${ATTEMPT}/${MAX} ===" | tee -a gradle-build.log
-          if ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tee -a gradle-build.log; then
+          if ./gradlew clean assembleDebug assembleRelease --no-daemon --stacktrace 2>&1 | tee -a gradle-build.log; then
             echo "Build succeeded on attempt ${ATTEMPT}" | tee -a gradle-build.log
             exit 0
           fi
@@ -85,14 +85,14 @@ jobs:
         path: gradle-build.log
 
     - name: Generate Jacoco Test Coverage Report
-      run: ./gradlew jacocoTestReport --no-daemon || true
+      run: ./gradlew testDebugUnitTest jacocoTestReport --no-daemon
 
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v7
       if: success()
       with:
         name: coverage-report
-        path: app/build/reports/jacoco/test/jacocoTestReport/html/index.html
+        path: app/build/reports/jacoco/jacocoTestReport/html/
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v7
@@ -100,10 +100,16 @@ jobs:
         name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
 
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v7
+      with:
+        name: app-release
+        path: app/build/outputs/apk/release/app-release-unsigned.apk
+
     - name: Create GitHub Release (tag builds)
       if: startsWith(github.ref, 'refs/tags/v')
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh release create "${GITHUB_REF_NAME}" app/build/outputs/apk/debug/app-debug.apk --generate-notes --verify-tag \
-          || gh release upload "${GITHUB_REF_NAME}" app/build/outputs/apk/debug/app-debug.apk --clobber
+        gh release create "${GITHUB_REF_NAME}" app/build/outputs/apk/release/app-release-unsigned.apk --generate-notes --verify-tag \
+          || gh release upload "${GITHUB_REF_NAME}" app/build/outputs/apk/release/app-release-unsigned.apk --clobber

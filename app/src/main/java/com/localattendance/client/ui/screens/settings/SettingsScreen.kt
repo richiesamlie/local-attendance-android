@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.localattendance.client.data.repository.normalizeServerUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,9 +23,21 @@ fun SettingsScreen(
     var showServerDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var newServerUrl by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadSettings()
+    }
+
+    LaunchedEffect(uiState.error, uiState.successMessage) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessages()
+        }
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessages()
+        }
     }
 
     Scaffold(
@@ -32,7 +45,8 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -127,30 +141,44 @@ fun SettingsScreen(
     }
 
     if (showServerDialog) {
+        val isValidServerUrl = normalizeServerUrl(newServerUrl) != null
         AlertDialog(
-            onDismissRequest = { showServerDialog = false },
+            onDismissRequest = { if (!uiState.isSaving) showServerDialog = false },
             title = { Text("Server URL") },
             text = {
-                OutlinedTextField(
-                    value = newServerUrl,
-                    onValueChange = { newServerUrl = it },
-                    label = { Text("URL (e.g., http://192.168.1.5:3000)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column {
+                    OutlinedTextField(
+                        value = newServerUrl,
+                        onValueChange = { newServerUrl = it },
+                        label = { Text("URL (e.g., http://192.168.1.5:3000)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = newServerUrl.isNotBlank() && !isValidServerUrl
+                    )
+                    if (newServerUrl.isNotBlank() && !isValidServerUrl) {
+                        Text(
+                            "Use http:// or https:// with host and optional port only",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.saveServerUrl(newServerUrl)
-                        showServerDialog = false
-                    }
+                        viewModel.saveServerUrl(newServerUrl) {
+                            showServerDialog = false
+                        }
+                    },
+                    enabled = !uiState.isSaving && isValidServerUrl
                 ) {
-                    Text("Save")
+                    Text(if (uiState.isSaving) "Saving..." else "Save")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showServerDialog = false }) {
+                TextButton(onClick = { showServerDialog = false }, enabled = !uiState.isSaving) {
                     Text("Cancel")
                 }
             }
@@ -165,9 +193,10 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.logout()
                         showLogoutDialog = false
-                        onLogout()
+                        viewModel.logout {
+                            onLogout()
+                        }
                     }
                 ) {
                     Text("Logout", color = MaterialTheme.colorScheme.error)

@@ -1,6 +1,8 @@
 # Local caches / generated temp
 .gradle/
 .artifacts/
+.android-sdk/
+app/build/
 
 # OS/editor noise
 .DS_Store

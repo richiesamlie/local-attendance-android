@@ -6,6 +6,7 @@ import com.localattendance.client.data.api.AuthEvents
 import com.localattendance.client.data.api.AuthInterceptor
 import com.localattendance.client.data.api.CookieInterceptor
 import com.localattendance.client.data.api.DynamicBaseUrlInterceptor
+import com.localattendance.client.data.api.SessionCookieStore
 import com.localattendance.client.data.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
@@ -29,7 +30,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideCookieInterceptor(@ApplicationContext context: Context): CookieInterceptor = CookieInterceptor(context)
+    fun provideCookieInterceptor(cookieStore: SessionCookieStore): CookieInterceptor = CookieInterceptor(cookieStore)
 
     @Provides
     @Singleton
@@ -47,9 +48,9 @@ object NetworkModule {
     @Singleton
     fun provideAuthInterceptor(
         authEvents: AuthEvents,
-        @ApplicationContext context: Context
+        cookieStore: SessionCookieStore
     ): AuthInterceptor {
-        return AuthInterceptor(authEvents, context)
+        return AuthInterceptor(authEvents, cookieStore)
     }
 
     @Provides
